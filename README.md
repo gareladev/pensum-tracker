@@ -73,8 +73,11 @@ Para habilitar el botón **Guardar** y el login/registro:
 
    Puedes usar `.env.example` como plantilla.
 
-4. En el **SQL Editor** de Supabase ejecuta el contenido del archivo `supabase-schema.sql` para crear la tabla `user_progress` y las políticas RLS.
-5. (Opcional) En **Authentication → Providers → Email** activa **Confirm email** para que los usuarios verifiquen el correo al registrarse.
+4. **Migración**: crea la tabla `user_progress` de una de estas formas:
+   - **Dashboard**: en Supabase → **SQL Editor** → New query, pega y ejecuta el contenido de `supabase/migrations/20250305000000_create_user_progress.sql` (o de `supabase-schema.sql`).
+   - **CLI**: `npx supabase link --project-ref <tu-project-ref>` y luego `npm run db:migrate`.
+5. Verifica con `npm run db:verify` (debe imprimir "OK: tabla user_progress existe").
+6. (Opcional) En **Authentication → Providers → Email** activa **Confirm email** para que los usuarios verifiquen el correo al registrarse.
 
 Tras esto, los usuarios podrán registrarse, iniciar sesión y guardar/cargar su progreso desde la nube.
 
@@ -82,12 +85,15 @@ Tras esto, los usuarios podrán registrarse, iniciar sesión y guardar/cargar su
 
 ## Scripts
 
-| Comando        | Descripción              |
-|----------------|--------------------------|
-| `npm run dev`  | Servidor de desarrollo   |
-| `npm run build`| Build de producción      |
-| `npm run preview` | Vista previa del build |
-| `npm run lint` | Ejecutar ESLint          |
+| Comando           | Descripción                    |
+|-------------------|--------------------------------|
+| `npm run dev`     | Servidor de desarrollo         |
+| `npm run build`   | Build de producción            |
+| `npm run preview` | Vista previa del build         |
+| `npm run lint`    | Ejecutar ESLint                |
+| `npm run test`    | Tests unitarios (Vitest)       |
+| `npm run db:verify` | Comprobar que la tabla existe en Supabase |
+| `npm run db:migrate` | Aplicar migraciones (requiere `supabase link`) |
 
 ---
 
@@ -110,4 +116,4 @@ src/
 
 ## Licencia
 
-MIT (o la que definas para el proyecto).
+MIT
