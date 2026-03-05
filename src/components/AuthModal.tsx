@@ -80,13 +80,17 @@ export function AuthModal({ onClose, defaultMode = 'signin' }: Props) {
           <X size={20} />
         </button>
 
+        <div className="auth-modal-brand">
+          <img src="/favicon.png" alt="Pensum Tracker Logo" />
+        </div>
+
         <h2 className="auth-modal__title">
-          {mode === 'signin' ? 'Iniciar sesión' : 'Crear cuenta'}
+          {mode === 'signin' ? '¡Hola de nuevo! 👋' : 'Comienza tu viaje 🚀'}
         </h2>
         <p className="auth-modal__subtitle">
           {mode === 'signin'
-            ? 'Entra para guardar tu progreso en la nube.'
-            : 'Regístrate con tu correo para guardar tu progreso.'}
+            ? 'Inicia sesión para retomar tu progreso justo donde lo dejaste.'
+            : 'Regístrate y guarda tu avance en la nube de forma segura.'}
         </p>
 
         <form onSubmit={handleSubmit} className="auth-modal__form">
