@@ -9,14 +9,15 @@ import { MallaCurricular } from './components/MallaCurricular';
 import { Leyenda } from './components/Leyenda';
 import { StatsBar } from './components/StatsBar';
 import { AuthModal } from './components/AuthModal';
+import { CareerPickerModal } from './components/CareerPickerModal';
 import type { SubjectStatus } from './types';
 import { hasSupabase } from './lib/supabase';
 import './App.css';
 
 function App() {
   const { careers } = useCareers();
-  const [careerId, setCareerId] = useState<string>(() => careers[0]?.id ?? '');
-  const { getProgressForCareer, setSubjectStatus, getFullProgress, setFullProgress } = useProgress();
+  const [careerId, setCareerId] = useState<string>('');
+  const { progress, getProgressForCareer, setSubjectStatus, getFullProgress, setFullProgress } = useProgress();
   const { isMobile } = useDevice();
   const { user, signOut } = useAuth();
   const [careerOpen, setCareerOpen] = useState(false);
@@ -26,7 +27,7 @@ function App() {
   const loadedCloudRef = useRef(false);
 
   const career = careers.find((c) => c.id === careerId);
-  const progress = career ? getProgressForCareer(career.id) : {};
+  const progressForCareer = career ? getProgressForCareer(career.id) : {};
 
   const handleProgressChange = useCallback(
     (subjectId: string, newStatus: SubjectStatus) => {
@@ -35,9 +36,10 @@ function App() {
     [career, setSubjectStatus]
   );
 
+  // Solo auto-seleccionar carrera en desktop; en mobile el usuario elige en el modal
   useEffect(() => {
-    if (careers.length > 0 && !career) setCareerId(careers[0].id);
-  }, [careers, career]);
+    if (careers.length > 0 && !career && !isMobile) setCareerId(careers[0].id);
+  }, [careers, career, isMobile]);
 
   // Al cerrar sesión, permitir volver a cargar la nube en el próximo login
   useEffect(() => {
@@ -52,6 +54,15 @@ function App() {
       if (!error && data && Object.keys(data).length > 0) setFullProgress(data);
     });
   }, [user?.id, setFullProgress]);
+
+  // Auto-guardado cuando hay sesión: debounce 1.5 s tras cada cambio de progreso (sin mensaje en UI)
+  useEffect(() => {
+    if (!user?.id || !hasSupabase) return;
+    const t = setTimeout(() => {
+      saveProgressToCloud(user.id, getFullProgress()).then(() => {});
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [user?.id, progress]);
 
   const handleSave = useCallback(async () => {
     if (!user) {
@@ -141,26 +152,19 @@ function App() {
         )}
       </header>
 
-      {/* Mobile: sheet de selección de carrera */}
-      {isMobile && careerOpen && (
-        <div className="career-sheet-overlay" onClick={() => setCareerOpen(false)}>
-          <div className="career-sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="career-sheet__title">Seleccionar carrera</div>
-            {careers.map((c) => (
-              <button
-                key={c.id}
-                className={`career-sheet__item ${c.id === careerId ? 'career-sheet__item--active' : ''}`}
-                onClick={() => { setCareerId(c.id); setCareerOpen(false); }}
-              >
-                {c.name}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* Mobile: modal de selección de carrera (por defecto al abrir o al tocar el botón) */}
+      {isMobile && (!careerId || careerOpen) && careers.length > 0 && (
+        <CareerPickerModal
+          careers={careers}
+          selectedId={careerId || null}
+          onSelect={(id) => { setCareerId(id); setCareerOpen(false); }}
+          onClose={() => setCareerOpen(false)}
+          canClose={!!careerId}
+        />
       )}
 
       {/* ── Stats + Leyenda ── */}
-      {career && <StatsBar career={career} progress={progress} />}
+      {career && <StatsBar career={career} progress={progressForCareer} />}
       <Leyenda />
 
       {/* ── Malla ── */}
@@ -168,7 +172,7 @@ function App() {
         {career ? (
           <MallaCurricular
             career={career}
-            progress={progress}
+            progress={progressForCareer}
             onProgressChange={handleProgressChange}
           />
         ) : (

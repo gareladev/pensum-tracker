@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { ProgressMap } from '../types';
 
-const STORAGE_KEY = 'pemsun-progress';
+const STORAGE_KEY = 'pensum-tracker-progress';
 
 function loadProgress(): ProgressMap {
   try {

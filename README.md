@@ -83,6 +83,47 @@ Tras esto, los usuarios podrán registrarse, iniciar sesión y guardar/cargar su
 
 ---
 
+## Cómo agregar nuevas carreras
+
+Hay dos formas de incluir nuevas carreras en la app.
+
+### Opción 1: Desde un PDF de pensum (recomendado si tienes el PDF de la universidad)
+
+1. Coloca el archivo PDF del pensum dentro de **`src/data/`** (por ejemplo `Pensum_MiCarrera.pdf`).
+2. En la raíz del proyecto ejecuta:
+   ```bash
+   node scripts/parse-pdfs.mjs
+   ```
+3. El script lee todos los PDFs en `src/data/`, extrae materias y prerrequisitos, y **reescribe** `src/data/careers.ts` con todas las carreras (las que ya había más las nuevas).
+4. Reinicia la app (`npm run dev`) y verás la nueva carrera en el selector.
+
+**Nota:** El parser está pensado para PDFs de pensum con formato tipo UNICARIBE (tabla con CLAVE, NOMBRE, PRE, cuatrimestres). Si el PDF tiene otro formato, puede que haya que ajustar el script o usar la opción 2.
+
+### Opción 2: A mano en código
+
+Edita **`src/data/careers.ts`** y agrega un objeto más al array `careers`:
+
+```ts
+{
+  id: 'id-unico-carrera',           // ej: 'ingenieria-civil'
+  name: 'Nombre de la carrera',    // ej: 'Ingeniería Civil'
+  type: 'grado',                    // 'grado' o 'postgrado'
+  subjects: [
+    { id: 'COD-101', name: 'Nombre materia', semester: 1, prerequisites: [] },
+    { id: 'COD-102', name: 'Otra materia',   semester: 2, prerequisites: ['COD-101'] },
+    // ...
+  ],
+}
+```
+
+- **id**: identificador único (sin espacios, minúsculas).
+- **name**: nombre que se muestra en el selector.
+- **subjects**: cada materia tiene `id` (código), `name`, `semester` (número de cuatrimestre) y `prerequisites` (array de `id` de materias que son prerrequisito).
+
+Guarda el archivo y, si la app está corriendo, se actualizará solo.
+
+---
+
 ## Scripts
 
 | Comando           | Descripción                    |
@@ -111,6 +152,16 @@ src/
 ├── App.tsx
 └── main.tsx
 ```
+
+---
+
+## Autor y redes
+
+**Garela Dev** · [garela.dev](https://garela.dev)
+
+Sígueme:
+
+- [**Instagram**](https://www.instagram.com/gareladev) · [**TikTok**](https://www.tiktok.com/@gareladev) · [**YouTube**](https://www.youtube.com/@gareladev) · [**X**](https://x.com/gareladev)
 
 ---
 
