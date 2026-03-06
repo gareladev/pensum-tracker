@@ -14,6 +14,23 @@ import type { SubjectStatus } from './types';
 import { hasSupabase } from './lib/supabase';
 import './App.css';
 
+const STORAGE_KEY_CAREER = 'pensum-tracker-selected-career';
+
+function getStoredCareerId(userId: string): string | null {
+  try {
+    const raw = localStorage.getItem(`${STORAGE_KEY_CAREER}-${userId}`);
+    return raw && raw.length > 0 ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+function setStoredCareerId(userId: string, careerId: string) {
+  try {
+    localStorage.setItem(`${STORAGE_KEY_CAREER}-${userId}`, careerId);
+  } catch (_) {}
+}
+
 function App() {
   const { careers } = useCareers();
   const [careerId, setCareerId] = useState<string>('');
@@ -25,6 +42,7 @@ function App() {
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<'ok' | 'error' | null>(null);
   const loadedCloudRef = useRef(false);
+  const loadedSavedCareerRef = useRef(false);
 
   const career = careers.find((c) => c.id === careerId);
   const progressForCareer = career ? getProgressForCareer(career.id) : {};
@@ -36,7 +54,25 @@ function App() {
     [career, setSubjectStatus]
   );
 
-  // Solo auto-seleccionar carrera en desktop; en mobile el usuario elige en el modal
+  // Usuario con sesión: cargar la última carrera que seleccionó (un estudiante suele tener una sola)
+  useEffect(() => {
+    if (!user?.id || careers.length === 0 || loadedSavedCareerRef.current) return;
+    loadedSavedCareerRef.current = true;
+    const saved = getStoredCareerId(user.id);
+    if (saved && careers.some((c) => c.id === saved)) setCareerId(saved);
+  }, [user?.id, careers]);
+
+  // Al cerrar sesión, permitir volver a cargar carrera guardada en el próximo login
+  useEffect(() => {
+    if (!user) loadedSavedCareerRef.current = false;
+  }, [user]);
+
+  // Persistir carrera seleccionada cuando el usuario tiene sesión
+  useEffect(() => {
+    if (user?.id && careerId) setStoredCareerId(user.id, careerId);
+  }, [user?.id, careerId]);
+
+  // Solo auto-seleccionar carrera en desktop si no hay ninguna; en mobile el usuario elige en el modal
   useEffect(() => {
     if (careers.length > 0 && !career && !isMobile) setCareerId(careers[0].id);
   }, [careers, career, isMobile]);
