@@ -78,7 +78,10 @@ Para habilitar el botón **Guardar** y el login/registro:
    - **CLI**: `npx supabase link --project-ref <tu-project-ref>` y luego `npm run db:migrate`.
 5. Verifica con `npm run db:verify` (debe imprimir "OK: tabla user_progress existe").
 6. (Opcional) En **Authentication → Providers → Email** activa **Confirm email** para que los usuarios verifiquen el correo al registrarse.
-7. **Correo de confirmación**: los enlaces del email (confirmación de cuenta) redirigen por defecto a **https://pensum.garela.dev/** . Para usar otro dominio, define `VITE_SITE_URL` en `.env` (ej. `VITE_SITE_URL=https://pensum.garela.dev`). En **Authentication → URL Configuration** de Supabase pon **Site URL** = `https://pensum.garela.dev` y en **Redirect URLs** añade `https://pensum.garela.dev/**`.
+7. **Correo de confirmación (importante)**: si el enlace del email lleva a `http://localhost:3000` en vez de tu dominio, en Supabase ve a **Authentication** → **URL Configuration** y cambia:
+   - **Site URL** a `https://pensum.garela.dev` (Supabase usa esta URL para generar el enlace del correo).
+   - **Redirect URLs**: añade `https://pensum.garela.dev/**` para permitir la redirección tras confirmar.
+   - Guarda los cambios. Los próximos correos de confirmación usarán `https://pensum.garela.dev/#access_token=...`.
 
 Tras esto, los usuarios podrán registrarse, iniciar sesión y guardar/cargar su progreso desde la nube.
 

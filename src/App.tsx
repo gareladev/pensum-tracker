@@ -125,8 +125,8 @@ function App() {
       <header className="app-header">
         <div className="app-brand">
           <img src="/favicon.png" alt="Logo" style={{ width: isMobile ? 22 : 26, height: isMobile ? 22 : 26, borderRadius: '50%' }} />
-          {!isMobile && <h1>Malla Curricular UNICARIBE</h1>}
-          {isMobile && <h1>Malla UNICARIBE</h1>}
+          {!isMobile && <h1>Malla Curricular</h1>}
+          {isMobile && <h1>Malla </h1>}
         </div>
 
         {/* Desktop: select nativo */}
